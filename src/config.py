@@ -5,8 +5,18 @@ Tải cấu hình từ file .env và thiết lập biến môi trường LangSmi
     config.py tự động set LANGCHAIN_* vào os.environ khi được import.
 """
 import os
+import sys
+import types
 from pathlib import Path
 from dotenv import load_dotenv
+
+# Create dynamic modules mock to bypass the Ragas/LangChain VertexAI import bug
+if "langchain_community.chat_models.vertexai" not in sys.modules:
+    vertexai_mock = types.ModuleType("langchain_community.chat_models.vertexai")
+    class ChatVertexAI:
+        pass
+    vertexai_mock.ChatVertexAI = ChatVertexAI
+    sys.modules["langchain_community.chat_models.vertexai"] = vertexai_mock
 
 # Tải .env từ thư mục gốc của project (Lab/)
 _root = Path(__file__).parent.parent
